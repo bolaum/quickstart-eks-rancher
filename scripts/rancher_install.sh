@@ -41,7 +41,7 @@ fi
 
 #Download latest Rancher repository
 helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
-helm fetch rancher-stable/rancher
+helm fetch rancher-latest/rancher
 
 # Create NameSpace:
 kubectl create namespace cattle-system
