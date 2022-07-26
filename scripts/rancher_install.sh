@@ -40,7 +40,7 @@ else
 fi
 
 #Download latest Rancher repository
-helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
+helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
 helm fetch rancher-stable/rancher
 
 # Create NameSpace:
