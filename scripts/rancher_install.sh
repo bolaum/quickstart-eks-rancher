@@ -17,11 +17,17 @@ KeyPrefix=${QSS3KeyPrefix%?}
 #Install jq for easier JSON object parsing
 sudo yum -y install jq
 
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+alias aws="/usr/local/bin/aws"
+aws --version
+
 #Update kube config to point to the cluster of our choice
 aws eks update-kubeconfig --name ${EKSCLUSTERNAME} --region $REGION
 
 #Install kubectl
-curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl
+curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.24.0/bin/linux/amd64/kubectl
 chmod +x ./kubectl
 sudo mv ./kubectl /usr/local/bin/kubectl
 kubectl version --client
@@ -29,6 +35,7 @@ kubectl get svc
 
 # Install helm
 curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+helm version
 
 # Start by creating the mandatory resources for NGINX Ingress in your cluster:
 # Parameterize version 0.40.2
@@ -40,8 +47,8 @@ else
 fi
 
 #Download latest Rancher repository
-helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
-helm fetch rancher-latest/rancher
+helm repo add rancher-latest https://releases.rancher.com/server-charts/stable
+helm fetch rancher-stable/rancher
 
 # Create NameSpace:
 kubectl create namespace cattle-system
