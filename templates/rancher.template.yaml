@@ -172,7 +172,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: 
+              Service:
                 - ssm.amazonaws.com
             Action: sts:AssumeRole
       ManagedPolicyArns:
@@ -197,7 +197,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: 
+              Service:
                 - lambda.amazonaws.com
             Action: sts:AssumeRole
       ManagedPolicyArns:
@@ -384,7 +384,7 @@ Resources:
           inputs:
             Service: ec2
             Api: DescribeInstances
-            Filters:  
+            Filters:
             - Name: "tag:Name"
               Values: [ "TempRancherInstance" ]
             - Name: "instance-state-name"
@@ -405,7 +405,7 @@ Resources:
               CloudWatchLogGroupName: !Sub '/aws/Quick_Start/${AWS::StackName}'
             Parameters:
               commands:
-                - wget -O /tmp/rancher_install.sh https://{{QSS3BucketName}}.s3.{{QSS3BucketRegion}}.amazonaws.com/{{QSS3KeyPrefix}}scripts/rancher_install.sh
+                - wget -O /tmp/rancher_install.sh https://github.com/bolaum/quickstart-eks-rancher/raw/feat/update-aws-and-kubectl-version/scripts/rancher_install.sh
                 - /bin/su - ec2-user -c 'cd /tmp && sh -x rancher_install.sh {{Region}} {{QSS3BucketName}} {{QSS3KeyPrefix}} {{QSS3BucketRegion}} {{EKSClusterName}} {{DomainName}}'
         # Determines if CFN Needs to be Signaled or if Work flow should just end
         - name: CFNSignalEnd
@@ -413,7 +413,7 @@ Resources:
           inputs:
             Choices:
             - NextStep: signalsuccess
-              Not: 
+              Not:
                 Variable: "{{StackName}}"
                 StringEquals: ""
             - NextStep: sleepend
@@ -472,15 +472,15 @@ Resources:
               import cfnresponse
               import boto3, os, json
               from botocore.vendored import requests
-          
+
               ssm_cl = boto3.client('ssm')
               ecr_cl = boto3.client('ecr')
               req_type = event['RequestType']
               print(event)
-          
+
               SUCCESS = "SUCCESS"
               FAILED = "FAILED"
-          
+
               def start_ssmautomation(event):
                   doc_name = event['ResourceProperties']['DocumentName']
                   stack_name = event['ResourceProperties']['StackName']
@@ -496,7 +496,7 @@ Resources:
                   domain_name = event['ResourceProperties']['DomainName']
                   if qs_bucket == "aws-quickstart":
                     qs_bucket = "aws-quickstart-" + qs_region
-          
+
                   start_automation = ssm_cl.start_automation_execution(
                       DocumentName= doc_name,
                       Parameters={
@@ -535,9 +535,9 @@ Resources:
                           ]
                       },
                   )
-          
+
                   cfnresponse.send(event, context, SUCCESS, start_automation, start_automation['AutomationExecutionId'])
-              
+
               def delete_image(event):
                   cfnresponse.send(event, context, SUCCESS, event, "Deleted")
 
@@ -546,16 +546,16 @@ Resources:
                   'Delete': delete_image,
                   'Update': start_ssmautomation
               }
-          
+
               try:
-                  actions.get(req_type)(event)    
+                  actions.get(req_type)(event)
               except Exception as exc:
                   error_msg = {'Error': '{}'.format(exc)}
                   print(error_msg)
                   cfnresponse.send(event, context, FAILED, error_msg)
   ExecuteSSMAutomation:
     Type: Custom::ExecuteSSMAutomation
-    Properties: 
+    Properties:
       ServiceToken: !GetAtt LambdaSSMExecute.Arn
       DocumentName: !Ref RancherInstallerSetup
       StackName: !Ref AWS::StackName
@@ -571,16 +571,16 @@ Resources:
       DomainName: !Ref 'DomainName'
   SSMWaitHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
-  SSMWaitCondition: 
+  SSMWaitCondition:
     Type: AWS::CloudFormation::WaitCondition
     CreationPolicy:
       ResourceSignal:
         Timeout: PT60M
         Count: 1
-    DependsOn: 
+    DependsOn:
       - ExecuteSSMAutomation
-    Properties: 
-      Handle: 
+    Properties:
+      Handle:
         Ref: "SSMWaitHandle"
       Timeout: "3600"
       Count: 1
